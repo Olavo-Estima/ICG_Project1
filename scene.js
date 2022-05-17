@@ -19,6 +19,9 @@ const sceneElements = {
 
 
 var visibleFlag = 1;
+var enable = 1;
+var i = 0.04; 
+
 // Functions are called
 //  1. Initialize the empty scene
 //  2. Add elements within the scene
@@ -27,6 +30,7 @@ helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
 
+const sun = sceneElements.sceneGraph.getObjectByName("sun");
 // HANDLING EVENTS
 
 // Event Listeners
@@ -52,9 +56,11 @@ function resizeWindow(eventParam) {
 function onDocumentKeyDown(event) {
     switch (event.keyCode) {
         case 65: //a
+            i += 0.01;
             keyA = true;
             break;
         case 68: //d
+            if (i>0) i -= 0.01;
             keyD = true;
             break;
         case 72: //h
@@ -62,9 +68,11 @@ function onDocumentKeyDown(event) {
             keyH = true;            
             break;
         case 83: //s
+            enable = !enable;
             keyS = true;
             break;
         case 87: //w
+            sun.position.set(0, 30, 0);
             keyW = true;
             break;
     }
@@ -91,6 +99,11 @@ function onDocumentKeyUp(event) {
 
 //////////////////////////////////////////////////////////////////
 
+var car = createCar(sceneElements.sceneGraph);
+    sceneElements.sceneGraph.add(car);
+
+    car.translateZ(5)
+    car.translateX(-2)
 
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
@@ -102,18 +115,13 @@ function load3DObjects(sceneGraph) {
     const grass = loader.load("https://i.imgur.com/dyR4hwl.jpeg")
     const tile = loader.load("https://static.vecteezy.com/ti/fotos-gratis/t1/1369175-textura-de-asfalto-preto-foto.jpg")
     const pavement = loader.load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi6F2er5ExHegEBmcdSIIThwiz7TPHMszs5Q&usqp=CAU")
-
     tile.wrapS = THREE.RepeatWrapping;
     tile.wrapT = THREE.RepeatWrapping;
-
     grass.wrapS = THREE.RepeatWrapping;
     grass.wrapT = THREE.RepeatWrapping;
-
-
     pavement.wrapS = THREE.RepeatWrapping;
     pavement.wrapT = THREE.RepeatWrapping;
     pavement.repeat.set (1,4);
-
 
     const planeGeometry = new THREE.BoxGeometry(25,25,0.1);
     const planeMaterial = new THREE.MeshPhongMaterial({ map: grass, color: 'rgb(100, 255, 100)', side: THREE.DoubleSide });
@@ -132,7 +140,6 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add(entrance3)
     entrance3.translateY(0.051)
     entrance3.translateZ(5)
-
 
     // Change orientation of the plane using rotation
     planeObject.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
@@ -162,12 +169,15 @@ function load3DObjects(sceneGraph) {
     var wall7 = addWallToScene(sceneGraph, 3,  3, 0.1,    6,  1.5, 2.5, "wall7");
     var wall8 = addWallToScene(sceneGraph, 0.1,  3, 5,    7.5,  1.5, 5, "wall8");
     var wall9 = addWallToScene(sceneGraph, 3,  3, 0.1,    6,  1.5, 7.5, "wall9");
-    var wall10 = addWallToScene(sceneGraph, 0.1,  3, 5,    4.5,  1.5, 5, "wall10");
+    var wall10 = addWallToScene(sceneGraph, 0.1,  3, 1.5,    4.5,  1.5, 3.25, "wall10");
+    var wall11 = addWallToScene(sceneGraph, 0.1,  3, 1.5,    4.5,  1.5, 6.75, "wall11");
+    var wall12 = addWallToScene(sceneGraph, 0.1, 1, 2,4.5, 2.5, 5, "wall12", false)
     var roof1 = createRoof(sceneGraph, 5.5,0.2,2, 4.5,2.5,5, "roof1", true, 0.9, -0.5);
     var roof2 = createRoof(sceneGraph, 5.5,0.2,2, 5.3,2,5, "roof2", false, 1.1, 1.8);
     
-    //var door1 = createDoor(sceneGraph, 0, 0, 0x6a4940)
-
+    
+    var door1 = createDoor(sceneGraph, 1, -4.95, 0x6a4940)
+    
     
     // The CAMERA
 
@@ -201,36 +211,41 @@ function computeFrame(time) {
     // THE SPOT LIGHT
 
     // Can extract an object from the scene Graph from its name
-    const sun = sceneElements.sceneGraph.getObjectByName("sun");
     
+    var step = i*time;
+    car.position.x = 2 + (3.5 * Math.cos(step * 0.03));
+
+
     // Apply a small displacement
-
-    if(decreaseX){
-        deltaX -= 0.1;
-        if(deltaX <= -30){
-            decreaseX = false;
+    
+    if(enable){
+        if(decreaseX){
+            deltaX -= 0.1;
+            if(deltaX <= -30){
+                decreaseX = false;
+            }
+        } else {
+            deltaX += 0.1;
+            if (deltaX >= 30){
+                decreaseX = true;
+            }
         }
-    } else {
-        deltaX += 0.1;
-        if (deltaX >= 30){
-            decreaseX = true;
+        if(decreaseY){
+            deltaY -= 0.1;
+            if(deltaY <= -30){
+                decreaseY = false;
+            }
+        } else {
+            deltaY += 0.1;
+            if (deltaY >= 30){
+                decreaseY = true;
+            }
         }
-    }
-
-    if(decreaseY){
-        deltaY -= 0.1;
-        if(deltaY <= -30){
-            decreaseY = false;
-        }
-    } else {
-        deltaY += 0.1;
-        if (deltaY >= 30){
-            decreaseY = true;
-        }
-    } 
-      
+    }   
+    
     sun.position.set(deltaX, deltaY, 0);
 
+    if(keyW) deltaX = 0; deltaY = 40; sun.position.set(deltaX, deltaY,0);
     // CONTROLING OBJECTS WITH KEYBOARD
 
     const wall1 =  sceneElements.sceneGraph.getObjectByName("wall1");    
@@ -243,6 +258,8 @@ function computeFrame(time) {
     const wall8 =  sceneElements.sceneGraph.getObjectByName("wall8");
     const wall9=   sceneElements.sceneGraph.getObjectByName("wall9");
     const wall10 = sceneElements.sceneGraph.getObjectByName("wall10");
+    const wall11 = sceneElements.sceneGraph.getObjectByName("wall11");
+    const wall12 = sceneElements.sceneGraph.getObjectByName("wall12");
     const roof1 =  sceneElements.sceneGraph.getObjectByName("roof1");
     const roof2 =  sceneElements.sceneGraph.getObjectByName("roof2");
     const roof3 =  sceneElements.sceneGraph.getObjectByName("roof3");
@@ -258,7 +275,6 @@ function computeFrame(time) {
     
     
     
-    
     if (keyH) {
         if(visibleFlag){
             wall1.visible = false;
@@ -271,6 +287,8 @@ function computeFrame(time) {
             wall8.visible = false;            
             wall9.visible = false;
             wall10.visible = false;
+            wall11.visible = false;
+            wall12.visible = false;
             roof1.visible = false;
             roof2.visible = false;
             roof3.visible = false;
@@ -295,6 +313,8 @@ function computeFrame(time) {
             wall8.visible = true;
             wall9.visible = true;
             wall10.visible = true;
+            wall11.visible = true;
+            wall1.visible = true;
             roof1.visible = true;
             roof2.visible = true;
             roof3.visible = true;
@@ -349,13 +369,20 @@ function addFloorToScene(scene, width, height, depth, x, y, z, color) {
     cubeMaterial.position.z = z;
 }
 
-function addWallToScene(scene, width, height, depth, x, y, z, name) {
+function addWallToScene(scene, width, height, depth, x, y, z, name, wrap) {
     const loader = new THREE.TextureLoader();
     const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
     mapOverlay.wrapS = THREE.RepeatWrapping;
     mapOverlay.wrapT = THREE.RepeatWrapping;
-    mapOverlay.repeat.set(3,3);
+    
+    if(wrap){
+        mapOverlay.repeat.set(1,1);
+    }
+    else mapOverlay.repeat.set(5,5);
+    
+    
 
+     
     var wallGeometry = new THREE.BoxBufferGeometry(width, height, depth);
     var wallMaterial = new THREE.MeshPhongMaterial({map: mapOverlay, color: 0xffffff });
     var wall = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -372,16 +399,16 @@ function addWallToScene(scene, width, height, depth, x, y, z, name) {
 }
 
 function createDoor(scene, x,z,color){
-    
-    
+    const loader = new THREE.TextureLoader();
+    const mapOverlay = loader.load("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/333c539c-253d-4900-aab3-9e9bdd76327a/d4iwzs7-3038c1bf-f18c-472d-91cd-2549c922e337.jpg/v1/fill/w_632,h_1264,q_70,strp/wooden_door_texture_by_ancientorange_d4iwzs7-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTgwMCIsInBhdGgiOiJcL2ZcLzMzM2M1MzljLTI1M2QtNDkwMC1hYWIzLTllOWJkZDc2MzI3YVwvZDRpd3pzNy0zMDM4YzFiZi1mMThjLTQ3MmQtOTFjZC0yNTQ5YzkyMmUzMzcuanBnIiwid2lkdGgiOiI8PTkwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.EDHb7yzUBrr6Ywlg2z1sUzLnO__a8nFul8Cpl_Dvo_Q")
     var wallGeometry = new THREE.BoxBufferGeometry(1, 2, 0.1);
-    var edgesMaterial = new THREE.MeshBasicMaterial({ color: color });
-    var wall = new THREE.Mesh(wallGeometry, edgesMaterial);
-    scene.add(wall);
+    var edgesMaterial = new THREE.MeshBasicMaterial({ map: mapOverlay, color: color });
+    var door = new THREE.Mesh(wallGeometry, edgesMaterial);
+    scene.add(door);
 
-    wall.position.x = x;
-    wall.position.y = 1.55;
-    wall.position.z = z;
+    door.position.x = x;
+    door.position.y = 1.05;
+    door.position.z = z;
 }
 
 function createRoof(scene, height, width, depth, x, y, z, name, reverse,translateZ, translateY){
@@ -457,6 +484,7 @@ function clearHolesWalls(scene){
     const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
     mapOverlay.wrapS = THREE.RepeatWrapping;
     mapOverlay.wrapT = THREE.RepeatWrapping;
+    mapOverlay.repeat.set(1.5,1.5)
 
 
     PrismGeometry.prototype = Object.create( THREE.ExtrudeGeometry.prototype );
@@ -469,7 +497,7 @@ function clearHolesWalls(scene){
 
     var height = 0.1;                   
     var geometry = new PrismGeometry( [ A, B, C ], height ); 
-    var material = new THREE.MeshPhongMaterial( {map: mapOverlay, color: 0xffffff, specular: 0x00ffff, shininess: 20 } );
+    var material = new THREE.MeshPhongMaterial( {map: mapOverlay, color: 0xffffff} );
 
 
 
@@ -530,23 +558,61 @@ function PrismGeometry( vertices, height ) {
 
 function furnishHouse(scene){ 
     var wall1 =  addWallToScene(scene,  0.1, 0.2, 10.1,  7.5,  0.15,   -5, "none");
-    var wall2 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,    0, "none");
-    var wall3 =  addWallToScene(scene,  0.1, 0.2,  5.1,  2.5,  0.15, -2.5, "none");
-    var wall4 =  addWallToScene(scene,  7.1, 0.2,  0.1,   -1,  0.15,   -5, "none");
-    var wall5 =  addWallToScene(scene,  0.1, 0.2,  5.1, -4.5,  0.15, -7.5, "none");
-    var wall6 =  addWallToScene(scene, 12.1, 0.2,  0.1,  1.5,  0.15,  -10, "none");
-    var wall7 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,   -4, "none");
-    var wall8 =  addWallToScene(scene,  0.1, 0.2,  4.1,  4.5,  0.15,   -2, "none");
-    var wall9 =  addWallToScene(scene,  0.1, 0.2,  5.1,    0,  0.15, -7.5, "none");
-    var wall10 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  2.5, "none");
-    var wall11 = addWallToScene(scene,  0.1, 0.2,    5,  7.5,  0.15,    5, "none");
-    var wall12 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  7.5, "none");
-    var wall13 = addWallToScene(scene,  0.1, 0.2,    5,  4.5,  0.15,    5, "none");
+    var wall2 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,    0, "none2");
+    var wall3 =  addWallToScene(scene,  0.1, 0.2,  5.1,  2.5,  0.15, -2.5, "none3");
+    var wall4 =  addWallToScene(scene,  7.1, 0.2,  0.1,   -1,  0.15,   -5, "none4");
+    var wall5 =  addWallToScene(scene,  0.1, 0.2,  5.1, -4.5,  0.15, -7.5, "none5");
+    var wall6 =  addWallToScene(scene, 12.1, 0.2,  0.1,  1.5,  0.15,  -10, "none6");
+    var wall7 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,   -4, "none7");
+    var wall8 =  addWallToScene(scene,  0.1, 0.2,  4.1,  4.5,  0.15,   -2, "none8");
+    var wall9 =  addWallToScene(scene,  0.1, 0.2,  5.1,    0,  0.15, -7.5, "none9");
+    var wall10 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  2.5, "none10");
+    var wall11 = addWallToScene(scene,  0.1, 0.2,    5,  7.5,  0.15,    5, "none11");
+    var wall12 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  7.5, "none12");
+    var wall13 = addWallToScene(scene,  0.1, 0.2,    5,  4.5,  0.15,    5, "none13");
 
-    var door1 = new THREE.Shape()
+
+    
+   
 }
 
-function createCar(scene, x, z){
 
+function CreateWheels(){
+    const geometry = new THREE.BoxBufferGeometry(0.6, 0.6, 1.65);
+    const material = new THREE.MeshPhongMaterial({ color: 0x333333 });
+    const wheel = new THREE.Mesh(geometry, material);
+    return wheel;
 }
 
+function createCar(scene) {
+        const car = new THREE.Group();
+        
+        const backWheel = CreateWheels();
+        backWheel.position.y = 0.3;
+        backWheel.position.x = -0.9;
+        car.add(backWheel);
+        
+        const frontWheel = CreateWheels();
+        frontWheel.position.y = 0.3;  
+        frontWheel.position.x = 0.9;
+        car.add(frontWheel);
+      
+        const main = new THREE.Mesh(
+          new THREE.BoxBufferGeometry(3, 0.75, 1.5),
+          new THREE.MeshPhongMaterial({ color: 0xff0000 })
+        );
+        main.position.y = 0.6;
+        car.add(main);
+      
+        const cabin = new THREE.Mesh(
+          new THREE.BoxBufferGeometry(1.65, 0.6, 1.2),
+          new THREE.MeshPhongMaterial({ color: 0xffffff })
+        );
+        cabin.position.x = -0.3;
+        cabin.position.y = 1.275;
+        car.add(cabin);
+      
+        return car;
+}
+      
+      
