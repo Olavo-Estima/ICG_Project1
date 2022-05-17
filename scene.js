@@ -152,10 +152,10 @@ function load3DObjects(sceneGraph) {
     furnishHouse(sceneGraph);
 
     
-    var roof3 = createRoof(sceneGraph, 10.5,0.2,3, 2.75,2.5,-5, "roof3", true, 1.2, -0.6);
-    var roof4 = createRoof(sceneGraph, 10.5,0.2,3, 5,2,-5, "roof4", false, 0.8, 1.9);
-    var roof5 = createRoof2(sceneGraph, 3, 0.2, 7, 1.25, 2.5, -5, "roof5", true, 0.5, -1.4, 2.5);
-    var roof6= createRoof2(sceneGraph, 3, 0.2, 7, -1.25, 2.5, -10, "roof6", false, 0.5, -1.45, 0.0);
+    var roof3 = createRoof(sceneGraph, 10.5,0.2,3, 2.75,2.5,-5, "roof3", true, 1.21, -0.6);
+    var roof4 = createRoof(sceneGraph, 10.5,0.2,3, 5,2,-5, "roof4", false, 0.71, 1.9);
+    var roof5 = createRoof2(sceneGraph, 3, 0.2, 7, 1.25, 2.5, -5, "roof5", true, 0.55, -1.45, 2.5);
+    var roof6= createRoof2(sceneGraph, 3, 0.2, 7, -1.25, 2.5, -10, "roof6", false, 0.55, -1.45, 0.0);
    
     // GARAGE
     addFloorToScene(sceneGraph, 3, 0.1, 5, 6, 0, 5, 0xC0C0C0);
@@ -227,7 +227,7 @@ function computeFrame(time) {
         if (deltaY >= 30){
             decreaseY = true;
         }
-    }
+    } 
       
     sun.position.set(deltaX, deltaY, 0);
 
@@ -387,6 +387,9 @@ function createDoor(scene, x,z,color){
 function createRoof(scene, height, width, depth, x, y, z, name, reverse,translateZ, translateY){
     const loader = new THREE.TextureLoader();
     const mapOverlay = loader.load('https://i.imgur.com/qblNfOO.jpeg.jpg');
+    mapOverlay.wrapS = THREE.RepeatWrapping;
+    mapOverlay.wrapT = THREE.RepeatWrapping;
+    mapOverlay.repeat.set(4,4);
     
     // Draw roof
     const roofShape = new THREE.BoxBufferGeometry(height,width,depth);
@@ -419,6 +422,9 @@ function createRoof2(scene, height, width, depth, x, y, z, name, reverse,transla
     
     const loader = new THREE.TextureLoader();
     const mapOverlay = loader.load('https://i.imgur.com/qblNfOO.jpeg.jpg');
+    mapOverlay.wrapS = THREE.RepeatWrapping;
+    mapOverlay.wrapT = THREE.RepeatWrapping;
+    mapOverlay.repeat.set(2,2);
 
     // Draw roof
     const roofShape = new THREE.BoxBufferGeometry(height,width,depth);
