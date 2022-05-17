@@ -1,0 +1,8 @@
+
+body { 
+	margin: 0px;
+}
+
+.sortable-handler {
+	touch-action: none;
+}
