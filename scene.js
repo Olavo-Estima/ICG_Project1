@@ -103,6 +103,18 @@ function load3DObjects(sceneGraph) {
     const tile = loader.load("https://static.vecteezy.com/ti/fotos-gratis/t1/1369175-textura-de-asfalto-preto-foto.jpg")
     const pavement = loader.load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi6F2er5ExHegEBmcdSIIThwiz7TPHMszs5Q&usqp=CAU")
 
+    tile.wrapS = THREE.RepeatWrapping;
+    tile.wrapT = THREE.RepeatWrapping;
+
+    grass.wrapS = THREE.RepeatWrapping;
+    grass.wrapT = THREE.RepeatWrapping;
+
+
+    pavement.wrapS = THREE.RepeatWrapping;
+    pavement.wrapT = THREE.RepeatWrapping;
+    pavement.repeat.set (1,4);
+
+
     const planeGeometry = new THREE.BoxGeometry(25,25,0.1);
     const planeMaterial = new THREE.MeshPhongMaterial({ map: grass, color: 'rgb(100, 255, 100)', side: THREE.DoubleSide });
     const planeObject = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -193,7 +205,7 @@ function computeFrame(time) {
     
     // Apply a small displacement
 
-    /* if(decreaseX){
+    if(decreaseX){
         deltaX -= 0.1;
         if(deltaX <= -30){
             decreaseX = false;
@@ -215,8 +227,8 @@ function computeFrame(time) {
         if (deltaY >= 30){
             decreaseY = true;
         }
-    } */
-    
+    }
+      
     sun.position.set(deltaX, deltaY, 0);
 
     // CONTROLING OBJECTS WITH KEYBOARD
@@ -340,7 +352,10 @@ function addFloorToScene(scene, width, height, depth, x, y, z, color) {
 function addWallToScene(scene, width, height, depth, x, y, z, name) {
     const loader = new THREE.TextureLoader();
     const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
-    
+    mapOverlay.wrapS = THREE.RepeatWrapping;
+    mapOverlay.wrapT = THREE.RepeatWrapping;
+    mapOverlay.repeat.set(3,3);
+
     var wallGeometry = new THREE.BoxBufferGeometry(width, height, depth);
     var wallMaterial = new THREE.MeshPhongMaterial({map: mapOverlay, color: 0xffffff });
     var wall = new THREE.Mesh(wallGeometry, wallMaterial);
@@ -433,12 +448,15 @@ function createRoof2(scene, height, width, depth, x, y, z, name, reverse,transla
 
 function clearHolesWalls(scene){
     const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load("https://i.imgur.com/qblNfOO.jpeg.jpg")
+    const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
+    mapOverlay.wrapS = THREE.RepeatWrapping;
+    mapOverlay.wrapT = THREE.RepeatWrapping;
+
 
     PrismGeometry.prototype = Object.create( THREE.ExtrudeGeometry.prototype );
     var A = new THREE.Vector3( 0, 0);
     var B = new THREE.Vector2( 5, 0);
-    var C = new THREE.Vector2( 2.5, 1.1 );
+    var C = new THREE.Vector2( 2.5, 1.125 );
     var D = new THREE.Vector2( 3, 0);
     var E = new THREE.Vector2( 1.5, 0.5);
 
@@ -446,6 +464,8 @@ function clearHolesWalls(scene){
     var height = 0.1;                   
     var geometry = new PrismGeometry( [ A, B, C ], height ); 
     var material = new THREE.MeshPhongMaterial( {map: mapOverlay, color: 0xffffff, specular: 0x00ffff, shininess: 20 } );
+
+
 
     var prism1 = new THREE.Mesh( geometry, material );
     scene.add(prism1)
@@ -518,6 +538,9 @@ function furnishHouse(scene){
     var wall13 = addWallToScene(scene,  0.1, 0.2,    5,  4.5,  0.15,    5, "none");
 
     var door1 = new THREE.Shape()
-     
+}
+
+function createCar(scene, x, z){
+
 }
 
