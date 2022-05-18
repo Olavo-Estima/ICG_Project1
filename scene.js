@@ -627,7 +627,4 @@ function createCar() {
     main.castShadow = true;
     
     return car;
-
 }
-      
-      
