@@ -99,11 +99,12 @@ function onDocumentKeyUp(event) {
 
 //////////////////////////////////////////////////////////////////
 
-var car = createCar(sceneElements.sceneGraph);
-    sceneElements.sceneGraph.add(car);
+var car = createCar();
+sceneElements.sceneGraph.add(car);
 
-    car.translateZ(5)
-    car.translateX(-2)
+car.translateZ(5)
+car.translateX(-2)
+car.castShadow = true;
 
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
@@ -367,6 +368,10 @@ function addFloorToScene(scene, width, height, depth, x, y, z, color) {
     cubeMaterial.position.y = (1.5*y)+0.05;
     floor.position.z =  z;
     cubeMaterial.position.z = z;
+
+    cubeMaterial.receiveShadow = true;
+    floor.receiveShadow = true;
+    floor.shadowMap
 }
 
 function addWallToScene(scene, width, height, depth, x, y, z, name, wrap) {
@@ -477,6 +482,8 @@ function createRoof2(scene, height, width, depth, x, y, z, name, reverse,transla
     roof.position.z += z;
 
     roof.name = name;
+    roof.castShadow = true;
+    roof.receiveShadow = true;
 }
 
 function clearHolesWalls(scene){
@@ -581,38 +588,46 @@ function CreateWheels(){
     const geometry = new THREE.BoxBufferGeometry(0.6, 0.6, 1.65);
     const material = new THREE.MeshPhongMaterial({ color: 0x333333 });
     const wheel = new THREE.Mesh(geometry, material);
+    wheel.castShadow = true;
     return wheel;
 }
 
-function createCar(scene) {
-        const car = new THREE.Group();
-        
-        const backWheel = CreateWheels();
-        backWheel.position.y = 0.3;
-        backWheel.position.x = -0.9;
-        car.add(backWheel);
-        
-        const frontWheel = CreateWheels();
-        frontWheel.position.y = 0.3;  
-        frontWheel.position.x = 0.9;
-        car.add(frontWheel);
-      
-        const main = new THREE.Mesh(
-          new THREE.BoxBufferGeometry(3, 0.75, 1.5),
-          new THREE.MeshPhongMaterial({ color: 0xff0000 })
-        );
-        main.position.y = 0.6;
-        car.add(main);
-      
-        const cabin = new THREE.Mesh(
-          new THREE.BoxBufferGeometry(1.65, 0.6, 1.2),
-          new THREE.MeshPhongMaterial({ color: 0xffffff })
-        );
-        cabin.position.x = -0.3;
-        cabin.position.y = 1.275;
-        car.add(cabin);
-      
-        return car;
+function createCar() {
+    const car = new THREE.Group();
+    
+    const backWheel = CreateWheels();
+    backWheel.position.y = 0.3;
+    backWheel.position.x = -0.9;
+    car.add(backWheel);
+    
+    const frontWheel = CreateWheels();
+    frontWheel.position.y = 0.3;  
+    frontWheel.position.x = 0.9;
+    car.add(frontWheel);
+    
+    const main = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(3, 0.75, 1.5),
+        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+    );
+    main.position.y = 0.6;
+    car.add(main);
+    
+    const cabin = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(1.65, 0.6, 1.2),
+        new THREE.MeshPhongMaterial({ color: 0xffffff })
+    );
+    cabin.position.x = -0.3;
+    cabin.position.y = 1.275;
+    car.add(cabin);
+    
+    
+    cabin.castShadow = true;
+    backWheel.castShadow = true;
+    frontWheel.castShadow = true;
+    main.castShadow = true;
+    
+    return car;
+
 }
       
       
