@@ -20,7 +20,8 @@ const sceneElements = {
 
 var visibleFlag = 1;
 var enable = 1;
-var i = 0.04; 
+var carSpeed = 0.04;
+var manual = 0;
 
 // Functions are called
 //  1. Initialize the empty scene
@@ -38,7 +39,7 @@ const sun = sceneElements.sceneGraph.getObjectByName("sun");
 window.addEventListener('resize', resizeWindow);
 
 //To keep track of the keyboard - WASD
-var keyD = false, keyA = false, keyS = false, keyW = false, keyH = false, keyArrowDown = false, keyArrowLeft = false, keyArrowRight = false, keyArrowUp = false;
+var keyD = false, keyA = false, keyS = false, keyW = false, keyH = false, keyArrowDown = false, keyArrowLeft = false, keyArrowRight = false, keyArrowUp = false, keyM = false;
 document.addEventListener('keydown', onDocumentKeyDown, false);
 document.addEventListener('keyup', onDocumentKeyUp, false);
 
@@ -55,18 +56,41 @@ function resizeWindow(eventParam) {
 
 function onDocumentKeyDown(event) {
     switch (event.keyCode) {
+        case 37:
+            car.position.z -= carSpeed;
+            car.position.x -= carSpeed;
+            car.rotation.y -= carSpeed;
+            keyArrowLeft = true;
+            break;
+        case 38:
+            car.position.x += carSpeed;
+            keyArrowUp = true;
+            break;
+        case 39:
+            car.position.z += carSpeed;
+            car.position.x += carSpeed;
+            car.rotation.y += carSpeed;
+            keyArrowRight = true;
+            break;
+        case 40:
+            car.position.x -= carSpeed;
+            keyArrowDown = true;
+            break;
         case 65: //a
-            i += 0.01;
+            carSpeed += 0.01;
             keyA = true;
             break;
         case 68: //d
-            if (i>0) i -= 0.01;
+            if (carSpeed > 0) carSpeed -= 0.01;
             keyD = true;
             break;
         case 72: //h
             visibleFlag = !visibleFlag;
             keyH = true;            
             break;
+        case 77: //m
+            manual = !manual;
+            keyM = true;
         case 83: //s
             enable = !enable;
             keyS = true;
@@ -79,6 +103,19 @@ function onDocumentKeyDown(event) {
 }
 function onDocumentKeyUp(event) {
     switch (event.keyCode) {
+    
+        case 37:
+            keyArrowLeft = false;
+            break;
+        case 38:
+            keyArrowUp = false;
+            break;
+        case 39:
+            keyArrowRight = false;
+            break;
+        case 40:
+            keyArrowDown = false;
+            break;
         case 68: //d
             keyD = false;
             break;
@@ -93,6 +130,9 @@ function onDocumentKeyUp(event) {
             break;
         case 87: //w
             keyW = false;
+            break;
+        case 77: //m
+            keyM = false;
             break;
     }
 }
@@ -213,10 +253,12 @@ function computeFrame(time) {
 
     // Can extract an object from the scene Graph from its name
     
-    var step = i*time;
-    car.position.x = 2 + (3.5 * Math.cos(step * 0.03));
-
-
+    if (!manual){
+        var step = carSpeed*time;
+        car.position.x = 2 + (3.5 * Math.cos(step * 0.01));
+    }else{
+        
+    }
     // Apply a small displacement
     
     if(enable){
@@ -246,7 +288,7 @@ function computeFrame(time) {
     
     sun.position.set(deltaX, deltaY, 0);
 
-    if(keyW) deltaX = 0; deltaY = 40; sun.position.set(deltaX, deltaY,0);
+    if(keyW) { deltaX = 0; deltaY = 30; sun.position.set(deltaX, deltaY,0); }
     // CONTROLING OBJECTS WITH KEYBOARD
 
     const wall1 =  sceneElements.sceneGraph.getObjectByName("wall1");    
@@ -354,8 +396,8 @@ function addFloorToScene(scene, width, height, depth, x, y, z, color) {
     var floorMaterial = new THREE.MeshPhongMaterial({ color: color });
 
     // The axes
-    const axesHelper = new THREE.AxesHelper(1000);
-    scene.add(axesHelper);
+    /* const axesHelper = new THREE.AxesHelper(1000);
+    scene.add(axesHelper); */
     // The cube 
 
     var floor = new THREE.Mesh(geometry, floorMaterial);
