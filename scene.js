@@ -17,9 +17,8 @@ const sceneElements = {
     renderer: null,
 };
 
-
 var visibleFlag = 1;
-var enable = 1;
+var enable = 0;
 var carSpeed = 0.04;
 var manual = 0;
 
@@ -31,7 +30,7 @@ helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
 
-const sun = sceneElements.sceneGraph.getObjectByName("sun");
+const sun = sceneElements.sceneGraph.getObjectByName("lightParent");
 // HANDLING EVENTS
 
 // Event Listeners
@@ -57,23 +56,15 @@ function resizeWindow(eventParam) {
 function onDocumentKeyDown(event) {
     switch (event.keyCode) {
         case 37:
-            car.position.z -= carSpeed;
-            car.position.x -= carSpeed;
-            car.rotation.y -= carSpeed;
             keyArrowLeft = true;
             break;
         case 38:
-            car.position.x += carSpeed;
             keyArrowUp = true;
             break;
         case 39:
-            car.position.z += carSpeed;
-            car.position.x += carSpeed;
-            car.rotation.y += carSpeed;
             keyArrowRight = true;
             break;
         case 40:
-            car.position.x -= carSpeed;
             keyArrowDown = true;
             break;
         case 65: //a
@@ -142,10 +133,11 @@ function onDocumentKeyUp(event) {
 var car = createCar();
 sceneElements.sceneGraph.add(car);
 
-car.translateZ(5)
-car.translateX(-2)
+car.translateZ(3)
+car.translateX(0)
 car.castShadow = true;
 
+var house = createHouse(sceneElements.sceneGraph, 4, 8, 15, 0xff9999, -10, -10, true);
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
 
@@ -160,65 +152,30 @@ function load3DObjects(sceneGraph) {
     tile.wrapT = THREE.RepeatWrapping;
     grass.wrapS = THREE.RepeatWrapping;
     grass.wrapT = THREE.RepeatWrapping;
+    grass.repeat.set(5,5)
     pavement.wrapS = THREE.RepeatWrapping;
     pavement.wrapT = THREE.RepeatWrapping;
     pavement.repeat.set (1,4);
 
-    const planeGeometry = new THREE.BoxGeometry(25,25,0.1);
-    const planeMaterial = new THREE.MeshPhongMaterial({ map: grass, color: 'rgb(100, 255, 100)', side: THREE.DoubleSide });
+    const planeGeometry = new THREE.BoxGeometry(50,50,0.1);
+    const planeMaterial = new THREE.MeshPhongMaterial({ map: grass, side: THREE.DoubleSide });
     const planeObject = new THREE.Mesh(planeGeometry, planeMaterial);
     sceneGraph.add(planeObject);
 
-    var entrance = new THREE.Mesh(new THREE.BoxGeometry(3,0.01,5), new THREE.MeshPhongMaterial({map: pavement}))
-    sceneGraph.add(entrance)
-    entrance.translateX(1)
-    entrance.translateZ(-2.5)
-    entrance.translateY(0.05)
-    var entrance2 = entrance.clone()
-    entrance2.translateZ(5)
-    sceneGraph.add(entrance2)
-    var entrance3 = new THREE.Mesh(new THREE.BoxGeometry(8.9,0.01,4.5), new THREE.MeshPhongMaterial({map: tile}))
-    sceneGraph.add(entrance3)
-    entrance3.translateY(0.051)
-    entrance3.translateZ(5)
 
+    createTree(sceneGraph, 15, 0);
+    createTree(sceneGraph, 15, -15);
+    createTree(sceneGraph, 15, 15);
+    createTree(sceneGraph, -15, 15);
+    createTree(sceneGraph, -15, 0);
+    createFence(sceneGraph)
+   
     // Change orientation of the plane using rotation
     planeObject.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
     // Set shadow property
     planeObject.receiveShadow = true;
     
     // HOUSE
-    addFloorToScene(sceneGraph, 5, 0.1, 10, 5, 0, -5, 0xBA8C63);
-    addFloorToScene(sceneGraph, 7, 0.1, 5, -1, 0, -7.5, 0xBA8C63);
-    var wall1 = addWallToScene(sceneGraph, 0.1, 3,  10,   7.5,  1.5, -5, "wall1");
-    var wall2 = addWallToScene(sceneGraph, 5,  3, 0.1,    5,  1.5, 0, "wall2");
-    var wall3 = addWallToScene(sceneGraph, 0.1,  3, 5,    2.5,  1.5, -2.5, "wall3");
-    var wall4 = addWallToScene(sceneGraph, 7,  3, 0.1,    -1,  1.5, -5, "wall4");
-    var wall5 = addWallToScene(sceneGraph, 0.1,  3, 5,    -4.5,  1.5, -7.5, "wall5");
-    var wall6 = addWallToScene(sceneGraph, 12,  3, 0.1,    1.5,  1.5, -10, "wall6");
-    clearHolesWalls(sceneGraph); 
-    furnishHouse(sceneGraph);
-
-    
-    var roof3 = createRoof(sceneGraph, 10.5,0.2,3, 2.75,2.5,-5, "roof3", true, 1.21, -0.6);
-    var roof4 = createRoof(sceneGraph, 10.5,0.2,3, 5,2,-5, "roof4", false, 0.71, 1.9);
-    var roof5 = createRoof2(sceneGraph, 3, 0.2, 7, 1.25, 2.5, -5, "roof5", true, 0.55, -1.45, 2.5);
-    var roof6= createRoof2(sceneGraph, 3, 0.2, 7, -1.25, 2.5, -10, "roof6", false, 0.55, -1.45, 0.0);
-   
-    // GARAGE
-    addFloorToScene(sceneGraph, 3, 0.1, 5, 6, 0, 5, 0xC0C0C0);
-    var wall7 = addWallToScene(sceneGraph, 3,  3, 0.1,    6,  1.5, 2.5, "wall7");
-    var wall8 = addWallToScene(sceneGraph, 0.1,  3, 5,    7.5,  1.5, 5, "wall8");
-    var wall9 = addWallToScene(sceneGraph, 3,  3, 0.1,    6,  1.5, 7.5, "wall9");
-    var wall10 = addWallToScene(sceneGraph, 0.1,  3, 1.5,    4.5,  1.5, 3.25, "wall10");
-    var wall11 = addWallToScene(sceneGraph, 0.1,  3, 1.5,    4.5,  1.5, 6.75, "wall11");
-    var wall12 = addWallToScene(sceneGraph, 0.1, 1, 2,4.5, 2.5, 5, "wall12", false)
-    var roof1 = createRoof(sceneGraph, 5.5,0.2,2, 4.5,2.5,5, "roof1", true, 0.9, -0.5);
-    var roof2 = createRoof(sceneGraph, 5.5,0.2,2, 5.3,2,5, "roof2", false, 1.1, 1.8);
-    
-    
-    var door1 = createDoor(sceneGraph, 1, -4.95, 0x6a4940)
-    
     
     // The CAMERA
 
@@ -228,9 +185,9 @@ function load3DObjects(sceneGraph) {
 
     // Position the camera
 
-    sceneElements.camera.position.x = -15;
-    sceneElements.camera.position.y = 10;
-    sceneElements.camera.position.z = 10;
+    sceneElements.camera.position.x = 0;
+    sceneElements.camera.position.y = 40;
+    sceneElements.camera.position.z = 50;
 
     // Point the camera to the center of the scene
 
@@ -241,8 +198,8 @@ function load3DObjects(sceneGraph) {
 
 
 
-    var deltaX = sceneElements.sceneGraph.getObjectByName("sun").position.x;
-    var deltaY = sceneElements.sceneGraph.getObjectByName("sun").position.y;
+    var deltaX = sceneElements.sceneGraph.getObjectByName("lightParent").position.x;
+    var deltaY = sceneElements.sceneGraph.getObjectByName("lightParent").position.y;
 
     var decreaseX = false; 
     var decreaseY = true;
@@ -253,37 +210,38 @@ function computeFrame(time) {
 
     // Can extract an object from the scene Graph from its name
     
-    if (!manual){
-        var step = carSpeed*time;
-        car.position.x = 2 + (3.5 * Math.cos(step * 0.01));
-    }else{
-        
-    }
+        var disp = 0.5;
+        if (car.position.x < 25 && car.position.x > -25 && car.position.z < 25  && car.position.z > -25){
+            if (keyArrowUp) { 
+                car.translateX(disp*.5);
+            }
+            if (keyArrowLeft) {
+                car.rotation.y += 0.1;
+                car.translateZ(-disp/3);
+                car.translateX(disp/3);
+            }
+            if (keyArrowDown) {
+                car.translateX(-disp*.5);
+            }
+            if (keyArrowRight) {
+                car.rotation.y -= 0.1;
+                car.translateZ(disp/3);
+                car.translateX(disp/3);
+            }
+    
+        } else {
+            const currx = car.position.x;
+            const currz = car.position.z;
+    
+            if (currx >= 25){ car.position.set( (-currx ) +0.1, 0, currz ) } 
+            if (currx <= -25) { car.position.set( (-currx) -0.1, 0, currz )  }
+            if (currz >= 25){ car.position.set( currx, 0, -currz+0.1 )  } 
+            if (currz <= -25) { car.position.set( currx, 0, -currz-0.1 )  }
+        }
     // Apply a small displacement
     
     if(enable){
-        if(decreaseX){
-            deltaX -= 0.1;
-            if(deltaX <= -30){
-                decreaseX = false;
-            }
-        } else {
-            deltaX += 0.1;
-            if (deltaX >= 30){
-                decreaseX = true;
-            }
-        }
-        if(decreaseY){
-            deltaY -= 0.1;
-            if(deltaY <= -30){
-                decreaseY = false;
-            }
-        } else {
-            deltaY += 0.1;
-            if (deltaY >= 30){
-                decreaseY = true;
-            }
-        }
+       sun.rotateZ(0.002)
     }   
     
     sun.position.set(deltaX, deltaY, 0);
@@ -291,85 +249,14 @@ function computeFrame(time) {
     if(keyW) { deltaX = 0; deltaY = 30; sun.position.set(deltaX, deltaY,0); }
     // CONTROLING OBJECTS WITH KEYBOARD
 
-    const wall1 =  sceneElements.sceneGraph.getObjectByName("wall1");    
-    const wall2 =  sceneElements.sceneGraph.getObjectByName("wall2");    
-    const wall3 =  sceneElements.sceneGraph.getObjectByName("wall3");
-    const wall4 =  sceneElements.sceneGraph.getObjectByName("wall4");
-    const wall5 =  sceneElements.sceneGraph.getObjectByName("wall5");
-    const wall6 =  sceneElements.sceneGraph.getObjectByName("wall6");
-    const wall7 =  sceneElements.sceneGraph.getObjectByName("wall7");
-    const wall8 =  sceneElements.sceneGraph.getObjectByName("wall8");
-    const wall9=   sceneElements.sceneGraph.getObjectByName("wall9");
-    const wall10 = sceneElements.sceneGraph.getObjectByName("wall10");
-    const wall11 = sceneElements.sceneGraph.getObjectByName("wall11");
-    const wall12 = sceneElements.sceneGraph.getObjectByName("wall12");
-    const roof1 =  sceneElements.sceneGraph.getObjectByName("roof1");
-    const roof2 =  sceneElements.sceneGraph.getObjectByName("roof2");
-    const roof3 =  sceneElements.sceneGraph.getObjectByName("roof3");
-    const roof4 =  sceneElements.sceneGraph.getObjectByName("roof4");
-    const roof5 =  sceneElements.sceneGraph.getObjectByName("roof5");
-    const roof6 =  sceneElements.sceneGraph.getObjectByName("roof6");
-    const prism1 = sceneElements.sceneGraph.getObjectByName("prism1");    
-    const prism2 = sceneElements.sceneGraph.getObjectByName("prism2");
-    const prism3 = sceneElements.sceneGraph.getObjectByName("prism3");    
-    const prism4 = sceneElements.sceneGraph.getObjectByName("prism4");
-    const prism5 = sceneElements.sceneGraph.getObjectByName("prism5");
-    const prism6 = sceneElements.sceneGraph.getObjectByName("prism6");
-    
     
     
     if (keyH) {
         if(visibleFlag){
-            wall1.visible = false;
-            wall2.visible = false;
-            wall3.visible = false;
-            wall4.visible = false;
-            wall5.visible = false;
-            wall6.visible = false;
-            wall7.visible = false;            
-            wall8.visible = false;            
-            wall9.visible = false;
-            wall10.visible = false;
-            wall11.visible = false;
-            wall12.visible = false;
-            roof1.visible = false;
-            roof2.visible = false;
-            roof3.visible = false;
-            roof4.visible = false;
-            roof5.visible = false;
-            roof6.visible = false;
-            prism1.visible = false;
-            prism2.visible = false;
-            prism3.visible = false;
-            prism4.visible = false;
-            prism5.visible = false;
-            prism6.visible = false;
+           house.visible = true;
         }
         else{
-            wall1.visible = true;
-            wall2.visible = true;
-            wall3.visible = true;
-            wall4.visible = true;
-            wall5.visible = true;
-            wall6.visible = true;
-            wall7.visible = true;
-            wall8.visible = true;
-            wall9.visible = true;
-            wall10.visible = true;
-            wall11.visible = true;
-            wall1.visible = true;
-            roof1.visible = true;
-            roof2.visible = true;
-            roof3.visible = true;
-            roof4.visible = true;
-            roof5.visible = true;
-            roof6.visible = true;
-            prism1.visible = true;
-            prism2.visible = true;
-            prism3.visible = true;
-            prism4.visible = true;
-            prism5.visible = true;            
-            prism6.visible = true;
+            house.visible = false;
         }
     }
 
@@ -383,248 +270,354 @@ function computeFrame(time) {
     requestAnimationFrame(computeFrame);
 }
 
-function addFloorToScene(scene, width, height, depth, x, y, z, color) {
-    var geometry = new THREE.BoxBufferGeometry(width, height, depth);
+function createTree(scene, posX, posZ){
+    var tree = new THREE.Group();
+    
+    // Base
+    var geometry = new THREE.CylinderGeometry(0.35, 0.5, 5, 40, 1);
+    const treeBase = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    tree.add(treeBase);
+    treeBase.position.y = 2.5;
+    geometry = new THREE.CylinderGeometry(0.3, 0.35, 2, 40, 1);
+    const treePart2 = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    treePart2.position.y = 6;
+    tree.add(treePart2)
+    geometry = new THREE.CylinderGeometry(0.1, 0.35, 4, 40, 1);
+    const treePart3 = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    treePart3.rotateX(Math.PI/4)
+    treePart3.position.y = 8.2;
+    treePart3.position.z = 1.5
+    tree.add(treePart3);
+    const treePart4 = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    treePart4.rotateX(-Math.PI/4 - 0.3)
+    treePart4.position.y = 5;
+    treePart4.position.z = -1.8
+    tree.add(treePart4);
+    const treePart5 = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    treePart5.rotateX(-Math.PI/4)
+    treePart5.rotateZ(Math.PI/3)
+    treePart5.position.y = 7.5;
+    treePart5.position.z = -0.7
+    treePart5.position.x = -1.8
+    tree.add(treePart5);
+    const treePart6 = new THREE.Mesh (geometry, new THREE.MeshPhongMaterial({color: 0xff0000, map: new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80")}));
+    treePart6.rotateZ(-Math.PI/4)
+    treePart6.position.y = 8.3;
+    treePart6.position.x = 1.4
+    tree.add(treePart6)
 
-    var edgesMaterial = new THREE.MeshPhongMaterial({ color: color });
-    var cubeMaterial = new THREE.Mesh(geometry, edgesMaterial);
+    // Folhas
+    const leaves = new THREE.TextureLoader().load("https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80");
+    leaves.wrapS = THREE.RepeatWrapping;
+    leaves.wrapT = THREE.RepeatWrapping;
+    leaves.repeat.set(3,3)
+    const treePart7 = new THREE.Mesh(new THREE.SphereGeometry(2, 25, 13), new THREE.MeshPhongMaterial({color:0x00FF00, map: leaves }))
+    const treePart8 = treePart7.clone();
+    const treePart9 = treePart7.clone();
+    const treePart10 = treePart7.clone();
+    treePart7.position.y = 5.5;
+    treePart7.position.z = -2.5;
+    tree.add(treePart7);
+    treePart8.position.y = 9.5;
+    treePart8.position.x = 3;
+    tree.add(treePart8);
+    treePart9.position.y = 9.5;
+    treePart9.position.z = 3;
+    tree.add(treePart9);
+    treePart10.position.y = 9;
+    treePart10.position.x = -3;
+    treePart10.position.z = -1.5;
+    tree.add(treePart10);
+    scene.add(tree);
+    tree.position.x = posX;
+    tree.position.z = posZ;
 
-    scene.add(cubeMaterial);
+    tree.rotateY(Math.floor(Math.random() * Math.PI));
 
-    // With a constant color
-
-    var floorMaterial = new THREE.MeshPhongMaterial({ color: color });
-
-    // The axes
-    /* const axesHelper = new THREE.AxesHelper(1000);
-    scene.add(axesHelper); */
-    // The cube 
-
-    var floor = new THREE.Mesh(geometry, floorMaterial);
-
-    scene.add(floor);
-    floor.receiveShadow = true;
-    floor.position.x =  x;
-    cubeMaterial.position.x = x;
-    floor.position.y = (1.5*y)+0.05;
-    cubeMaterial.position.y = (1.5*y)+0.05;
-    floor.position.z =  z;
-    cubeMaterial.position.z = z;
-
-    cubeMaterial.receiveShadow = true;
-    floor.receiveShadow = true;
-    floor.shadowMap
+    treeBase.castShadow = true;
+    treePart2.castShadow = true;
+    treePart3.castShadow = true;
+    treePart4.castShadow = true;
+    treePart5.castShadow = true;
+    treePart6.castShadow = true;
+    treePart7.castShadow = true;
+    treePart8.castShadow = true;
+    treePart9.castShadow = true;
+    treePart10.castShadow = true;
 }
 
-function addWallToScene(scene, width, height, depth, x, y, z, name, wrap) {
-    const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
-    mapOverlay.wrapS = THREE.RepeatWrapping;
-    mapOverlay.wrapT = THREE.RepeatWrapping;
+function createFence(scene){
+    const fence = new THREE.Group();
+    const fencePart1 = new THREE.Group();
+
+    const part1 = new THREE.Shape();
+    part1.moveTo(0,0);
+    part1.lineTo(0,2);
+    part1.lineTo(0.2,2.5);
+    part1.lineTo(0.4,2);
+    part1.lineTo(0.4,0);
+    part1.lineTo(0,0);
     
-    if(wrap){
-        mapOverlay.repeat.set(1,1);
-    }
-    else mapOverlay.repeat.set(5,5);
+    const geometry = new THREE.ExtrudeBufferGeometry([part1], {
+        steps: 5,
+        depth: 0.1,
+        bevelEnabled: false
+    })
+
+    var wood = new THREE.TextureLoader().load("https://images.unsplash.com/photo-1582231675377-b17f783ce211?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=648&q=80");
+    wood.wrapS = THREE.RepeatWrapping;
+    wood.wrapT = THREE.RepeatWrapping;
+    wood.repeat.set(0.4,0.4);
     
+    var first = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xc07341, map: wood }))
+    fencePart1.add(first);
+
+    var second = first.clone()
+    second.translateX(0.43);
+    fencePart1.add(second)
+
+    var third = second.clone()
+    third.translateX(0.43);
+    fencePart1.add(third)
+
+    var forth = third.clone()
+    forth.translateX(0.43);
+    fencePart1.add(forth)
+
+    var connector = new THREE.Shape();
+    connector.moveTo(0,1.15);
+    connector.lineTo(0,1.30);
+    connector.lineTo(1.72, 1.30);
+    connector.lineTo(1.72, 1.15);
+    connector.lineTo(0, 1.15);
+    
+    const geometry2 = new THREE.ExtrudeBufferGeometry([connector], {
+        steps: 5,
+        depth: 0.05,
+        bevelEnabled: false
+    })
+    
+    var connectors = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({color: 0xc07341}))
+    fencePart1.add(connectors);
+    connectors.translateZ(-0.1);
+
+    fence.add(fencePart1)
+    
+    var fence1Part2 = fencePart1.clone();
+    fence1Part2.translateX(1.72);
+    fencePart1.add(fence1Part2)
+
+    var fence1Part3 = fencePart1.clone();
+    fence1Part3.translateX(2* 1.72);
+    fencePart1.add(fence1Part3)
+
+    var fence1Part4 = fencePart1.clone();
+    fence1Part4.translateX(4*1.72);
+    fencePart1.add(fence1Part4)
+    
+    var fencePart5 = fencePart1.clone();
+    var fencePart4 = fencePart1.clone();
+    var fencePart6 = fencePart1.clone();
+
+    var fence1Part5 = fencePart1.clone();
+    fence1Part5.translateX(8*1.72);
+    fencePart1.add(fence1Part5)
+
+
+    var fence1Part6 = fence1Part5.clone();
+    fence1Part6.translateX(8*1.72);
+    fencePart1.add(fence1Part6)
+    
+    var fencePart2 = fencePart1.clone();
+    var fencePart3 = fencePart1.clone();
+
+    var fence4Part2 = fence1Part5.clone();
+    fence4Part2.translateX(8*1.72);
+    fencePart4.add(fence4Part2);
+
+   /*  var fence4Part3 = fence1Part5.clone();
+    fence4Part3.translateX(8*1.72);
+    fencePart4.add(fence4Part3); */
+    
+    fencePart1.rotateY(Math.PI/2);
+    fencePart1.translateX(-21.2);
+    fencePart1.translateZ(21.2);
+    fencePart2.rotateY(-Math.PI/2);
+    fencePart2.translateX(-20);
+    fencePart2.translateZ(20)
+    fencePart3.rotateY(Math.PI);
+    fencePart3.translateX(-21.2)
+    fencePart3.translateZ(20)
+    fencePart4.translateX(-20)
+    fencePart4.translateZ(21.2)
+    fencePart5.rotateY(-Math.PI/2);
+    fencePart5.translateX(7.5);
+    fencePart5.translateZ(-7.5);
+    fencePart6.rotateY(Math.PI/2);
+    fencePart6.translateX(-21.2)
+    fencePart6.translateZ(-6.3)
+
+    fence.add(fencePart2)
+    fence.add(fencePart3)
+    fence.add(fencePart4)
+    fence.add(fencePart5)
+    fence.add(fencePart6)
+    scene.add(fence);
     
 
-     
-    var wallGeometry = new THREE.BoxBufferGeometry(width, height, depth);
-    var wallMaterial = new THREE.MeshPhongMaterial({map: mapOverlay, color: 0xffffff });
-    var wall = new THREE.Mesh(wallGeometry, wallMaterial);
-    scene.add(wall);
-
-    wall.name = name;
-
-    wall.position.x = x+0.01;
-    wall.position.y = y+0.01;
-    wall.position.z = z+0.01;
-
-    wall.receiveShadow = true;
-    wall.castShadow = true;
 }
 
-function createDoor(scene, x,z,color){
-    const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/333c539c-253d-4900-aab3-9e9bdd76327a/d4iwzs7-3038c1bf-f18c-472d-91cd-2549c922e337.jpg/v1/fill/w_632,h_1264,q_70,strp/wooden_door_texture_by_ancientorange_d4iwzs7-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTgwMCIsInBhdGgiOiJcL2ZcLzMzM2M1MzljLTI1M2QtNDkwMC1hYWIzLTllOWJkZDc2MzI3YVwvZDRpd3pzNy0zMDM4YzFiZi1mMThjLTQ3MmQtOTFjZC0yNTQ5YzkyMmUzMzcuanBnIiwid2lkdGgiOiI8PTkwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.EDHb7yzUBrr6Ywlg2z1sUzLnO__a8nFul8Cpl_Dvo_Q")
-    var wallGeometry = new THREE.BoxBufferGeometry(1, 2, 0.1);
-    var edgesMaterial = new THREE.MeshBasicMaterial({ map: mapOverlay, color: color });
-    var door = new THREE.Mesh(wallGeometry, edgesMaterial);
-    scene.add(door);
-
-    door.position.x = x;
-    door.position.y = 1.05;
-    door.position.z = z;
-}
-
-function createRoof(scene, height, width, depth, x, y, z, name, reverse,translateZ, translateY){
-    const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load('https://i.imgur.com/qblNfOO.jpeg.jpg');
-    mapOverlay.wrapS = THREE.RepeatWrapping;
-    mapOverlay.wrapT = THREE.RepeatWrapping;
-    mapOverlay.repeat.set(4,4);
+function createHouse(scene, height, width, depth, color, posX, posZ, horizontal){
+    const house = new THREE.Group();
     
-    // Draw roof
-    const roofShape = new THREE.BoxBufferGeometry(height,width,depth);
-    const roofMaterial = new THREE.MeshPhongMaterial({map: mapOverlay, color: 0xff0000 });
-    const roof = new THREE.Mesh(roofShape, roofMaterial);
-    scene.add(roof);
+    var wallOverlay = new THREE.TextureLoader().load('https://i.imgur.com/lrznAwVb.jpg')
+    wallOverlay.wrapS = THREE.RepeatWrapping;
+    wallOverlay.wrapT = THREE.RepeatWrapping;
 
-    if(reverse){
-        roof.rotateY(-Math.PI / 2);
-        roof.rotateX(-Math.PI / 2 - 1.2);
-    }
-    else{
-        roof.rotateY(Math.PI / 2);
-        roof.rotateX(Math.PI / 2 - 1.2);
-    }
+    // Wall Shapes
+    const tiltWallShape = new THREE.Shape();
+    tiltWallShape.moveTo(0, 0);
+    tiltWallShape.lineTo(width/2, 0);
+    tiltWallShape.lineTo(width/2, height - 0.5);
+    tiltWallShape.lineTo(0, height);
+    tiltWallShape.lineTo(0, 0);
+    const tiltWallGeometry = new THREE.ExtrudeBufferGeometry([ tiltWallShape ], {
+        steps: 1,
+        depth: .2,
+        bevelEnabled: false,
+        curveSegments: 32
+    });
+
+    const tiltWallShape2 = new THREE.Shape();
+    tiltWallShape2.moveTo(0, 0);
+    tiltWallShape2.lineTo(depth+0.2, 0);
+    tiltWallShape2.lineTo(depth+0.2, height - 0.5);
+    tiltWallShape2.lineTo(0, height - 0.5);
+    tiltWallShape2.lineTo(0, 0);
+    const tiltWallGeometry2 = new THREE.ExtrudeBufferGeometry([ tiltWallShape2 ], {
+        steps: 1,
+        depth: .2,
+        bevelEnabled: false,
+        curveSegments: 32
+    });
+
+    // House Walls
+    const tiltWallA = new THREE.Mesh(tiltWallGeometry, new THREE.MeshPhongMaterial({ color: color, map: wallOverlay }));
+    house.add(tiltWallA)
+
+    const tiltWallB = tiltWallA.clone();
+    tiltWallB.rotateY(Math.PI);
+    tiltWallB.translateZ(-0.2);
+    house.add(tiltWallB)
+
+    const tiltWallC = tiltWallA.clone();
+    tiltWallC.translateZ(-depth);
+    house.add(tiltWallC);
+
+    const tiltWallD = tiltWallB.clone();
+    tiltWallD.translateZ(depth);
+    house.add(tiltWallD);
+
+    const tiltWallE = new THREE.Mesh(
+        tiltWallGeometry2, new THREE.MeshPhongMaterial({color: color, map: wallOverlay })
+    );
     
-    roof.translateZ(translateZ);
-    roof.translateY(translateY);
+    house.add(tiltWallE);
+    tiltWallE.translateX(width/2)
+    tiltWallE.translateZ(0.2)
+    tiltWallE.rotateY(Math.PI/2);
 
-    roof.position.x += x;
-    roof.position.y += y;
-    roof.position.z += z;
+    const tiltWallF = tiltWallE.clone();
+    tiltWallF.translateZ(-width);
+    house.add(tiltWallF);
 
-    roof.name = name;
-}
-
-function createRoof2(scene, height, width, depth, x, y, z, name, reverse,translateY, translateX, translateZ){
-    //const textureLoader = new THREE.TextureLoader();
-    //const roofTexture = textureLoader.load('./textures/telha.jpg');
-    
-    const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load('https://i.imgur.com/qblNfOO.jpeg.jpg');
-    mapOverlay.wrapS = THREE.RepeatWrapping;
-    mapOverlay.wrapT = THREE.RepeatWrapping;
-    mapOverlay.repeat.set(2,2);
-
-    // Draw roof
-    const roofShape = new THREE.BoxBufferGeometry(height,width,depth);
-    const roofMaterial = new THREE.MeshPhongMaterial({ map: mapOverlay, color: 0xff0000 });
-    const roof = new THREE.Mesh(roofShape, roofMaterial);
-    scene.add(roof);
-
-    if(reverse){
-        roof.rotateY(-Math.PI / 2);
-        roof.rotateZ(-Math.PI / 4 + 0.4);
-    }
-    else{
-        roof.rotateY(Math.PI / 2);
-        roof.rotateZ(-Math.PI / 4 + 0.4);
-    }
-    
-    roof.translateY(translateY);
-    roof.translateX(translateX);
-    roof.translateZ(translateZ);
-
-    roof.position.x += x;
-    roof.position.y += y;
-    roof.position.z += z;
-
-    roof.name = name;
-    roof.castShadow = true;
-    roof.receiveShadow = true;
-}
-
-function clearHolesWalls(scene){
-    const loader = new THREE.TextureLoader();
-    const mapOverlay = loader.load("https://i.imgur.com/lrznAwVb.jpg")
-    mapOverlay.wrapS = THREE.RepeatWrapping;
-    mapOverlay.wrapT = THREE.RepeatWrapping;
-    mapOverlay.repeat.set(1.5,1.5)
-
-
-    PrismGeometry.prototype = Object.create( THREE.ExtrudeGeometry.prototype );
-    var A = new THREE.Vector3( 0, 0);
-    var B = new THREE.Vector2( 5, 0);
-    var C = new THREE.Vector2( 2.5, 1.125 );
-    var D = new THREE.Vector2( 3, 0);
-    var E = new THREE.Vector2( 1.5, 0.5);
-
-
-    var height = 0.1;                   
-    var geometry = new PrismGeometry( [ A, B, C ], height ); 
-    var material = new THREE.MeshPhongMaterial( {map: mapOverlay, color: 0xffffff} );
-
-
-
-    var prism1 = new THREE.Mesh( geometry, material );
-    scene.add(prism1)
-    prism1.translateY(3)
-    prism1.translateX(2.5)
-
-    var prism2 = new THREE.Mesh( geometry, material );
-    scene.add(prism2)
-    prism2.rotation.y = Math.PI / 2;
-    prism2.translateY(3)
-    prism2.translateX(4.9)
-    prism2.translateZ(-4.6)
-
-    var prism3 = prism1.clone()
-    scene.add(prism3)
-    prism3.translateZ(-10.1)
-
-    var prism4 = prism2.clone()
-    scene.add(prism4)
-    prism4.translateZ(6.7)
-
-    var prism5 = new THREE.Mesh( new PrismGeometry([A, D, E], height), material);
-    scene.add(prism5)
-    prism5.translateX(4.55)
-    prism5.translateY(3)
-    prism5.translateZ(2.46)
-
-    var prism6 = prism5.clone()
-    scene.add(prism6)
-    prism6.translateZ(5)
-
-    prism1.name = "prism1"
-    prism2.name = "prism2"
-    prism3.name = "prism3"
-    prism4.name = "prism4"
-    prism5.name = "prism5"
-    prism6.name = "prism6"
-}
-
-function PrismGeometry( vertices, height ) {
-
-    var Shape = new THREE.Shape();
-    ( function f( ctx ) {
-    ctx.moveTo( vertices[0].x, vertices[0].y );
-        for (var i=1; i < vertices.length; i++) {
-            ctx.lineTo( vertices[i].x, vertices[i].y );
-        }
-        ctx.lineTo( vertices[0].x, vertices[0].y );    
-    } )( Shape );
-
-    var settings = { };
-    settings.amount = height;
-    settings.bevelEnabled = false;
-    THREE.ExtrudeGeometry.call( this, Shape, settings );
-};
-
-function furnishHouse(scene){ 
-    var wall1 =  addWallToScene(scene,  0.1, 0.2, 10.1,  7.5,  0.15,   -5, "none");
-    var wall2 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,    0, "none2");
-    var wall3 =  addWallToScene(scene,  0.1, 0.2,  5.1,  2.5,  0.15, -2.5, "none3");
-    var wall4 =  addWallToScene(scene,  7.1, 0.2,  0.1,   -1,  0.15,   -5, "none4");
-    var wall5 =  addWallToScene(scene,  0.1, 0.2,  5.1, -4.5,  0.15, -7.5, "none5");
-    var wall6 =  addWallToScene(scene, 12.1, 0.2,  0.1,  1.5,  0.15,  -10, "none6");
-    var wall7 =  addWallToScene(scene,  5.1, 0.2,  0.1,    5,  0.15,   -4, "none7");
-    var wall8 =  addWallToScene(scene,  0.1, 0.2,  4.1,  4.5,  0.15,   -2, "none8");
-    var wall9 =  addWallToScene(scene,  0.1, 0.2,  5.1,    0,  0.15, -7.5, "none9");
-    var wall10 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  2.5, "none10");
-    var wall11 = addWallToScene(scene,  0.1, 0.2,    5,  7.5,  0.15,    5, "none11");
-    var wall12 = addWallToScene(scene,    3, 0.2,  0.1,    6,  0.15,  7.5, "none12");
-    var wall13 = addWallToScene(scene,  0.1, 0.2,    5,  4.5,  0.15,    5, "none13");
-
-
-    
+    // Entrance Door
+    /* const doorShape = new THREE.Path();
+    doorShape.moveTo(0, 0);
+    doorShape.lineTo(2, 0);
+    doorShape.lineTo(2, 1.5);
+    doorShape.bezierCurveTo(2,2.5,0,2.5,0,1.5);
+    doorShape.lineTo(0, 0);
    
-}
+    var doorHole = new THREE.Mesh(doorShape,new THREE.MeshStandardMaterial({ color: 0xFF0000}))
+    house.add(doorHole) */
 
+    // Roof Shape
+    const tiltRoofShape = new THREE.Shape();
+    tiltRoofShape.moveTo(0, 0);
+    tiltRoofShape.lineTo(height+0.5, 0);
+    tiltRoofShape.lineTo(height+0.5, depth +1);
+    tiltRoofShape.lineTo(0, depth+1);
+    tiltRoofShape.lineTo(0, 0);
+    const tiltRoofGeometry = new THREE.ExtrudeBufferGeometry([ tiltRoofShape ], {
+        steps: 1,
+        depth: .2,
+        bevelEnabled: false,
+        curveSegments: 32
+    });
+    var roofOverlay = new THREE.TextureLoader().load('https://i.imgur.com/qblNfOO.jpeg.jpg')
+    roofOverlay.wrapS = THREE.RepeatWrapping;
+    roofOverlay.wrapT = THREE.RepeatWrapping;
+
+    var chimneyOverlay = new THREE.TextureLoader().load('https://i.imgur.com/qblNfOO.jpeg.jpg');
+    chimneyOverlay.wrapS = THREE.RepeatWrapping;
+    chimneyOverlay.wrapT = THREE.RepeatWrapping;
+    chimneyOverlay.repeat.set(3,3)
+
+
+    const roofA = new THREE.Mesh(tiltRoofGeometry, new THREE.MeshPhongMaterial({ color: 0xff0000, map: roofOverlay }));
+    const roofB = roofA.clone()
+    roofA.rotateX(Math.PI/2)
+    roofA.rotateY(0.15)
+    roofA.translateY(-depth-0.4)
+    roofA.translateX(-width/2+0.22)
+    roofA.translateZ(-height-0.2)
+    house.add(roofA);
+    
+    
+    roofB.rotateX(Math.PI/2)
+    roofB.rotateY(-0.15)
+    roofB.translateY(-depth-0.4)
+    roofB.translateX(-0.52)
+    roofB.translateZ(-height-0.22)
+    house.add(roofB)
+
+    
+
+    const chimney = new THREE.Mesh(new THREE.BoxGeometry(1,1.5,1), new THREE.MeshPhongMaterial({map: wallOverlay}))
+    chimney.position.y = 4.5;
+    chimney.position.x = -2.5;
+    chimney.position.z = -2;
+    house.add(chimney);
+    const chimneyTop = new THREE.Mesh(new THREE.ConeGeometry(1.2,0.5,4), new THREE.MeshPhongMaterial({color: 0xFF0000, map: chimneyOverlay}))
+    chimneyTop.position.y = 5.5;
+    chimneyTop.position.x = -2.5;
+    chimneyTop.position.z = -2;
+    chimneyTop.rotateY(Math.PI/4)
+    house.add(chimneyTop);
+
+    scene.add(house);
+
+
+    if(horizontal){ 
+        house.rotateY(-Math.PI/2)
+        house.position.x = posX;
+        house.position.z = posZ;
+    }
+
+    tiltWallA.castShadow = true;
+    tiltWallB.castShadow = true;
+    tiltWallC.castShadow = true;
+    tiltWallD.castShadow = true;
+    tiltWallE.castShadow = true;
+    tiltWallF.castShadow = true;
+    roofA.castShadow = true;
+    roofB.castShadow = true;
+    roofA.receiveShadow = true;
+    roofB.receiveShadow = true;
+    chimney.castShadow = true;
+    chimneyTop.castShadow = true;
+}
 
 function CreateWheels(){
     const geometry = new THREE.BoxBufferGeometry(0.6, 0.6, 1.65);
@@ -649,7 +642,7 @@ function createCar() {
     
     const main = new THREE.Mesh(
         new THREE.BoxBufferGeometry(3, 0.75, 1.5),
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+        new THREE.MeshPhongMaterial({ color: 0x0000ff, map: new THREE.TextureLoader().load("https://images.squarespace-cdn.com/content/v1/541d868ce4b0c158abe9c5f3/1478627110609-TNJRVO41UEIS2E7ZQEC9/image-asset.png?format=1000w") })
     );
     main.position.y = 0.6;
     car.add(main);
@@ -667,6 +660,6 @@ function createCar() {
     backWheel.castShadow = true;
     frontWheel.castShadow = true;
     main.castShadow = true;
-    
+    car.rotateY(Math.PI/2);
     return car;
 }

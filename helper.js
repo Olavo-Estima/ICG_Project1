@@ -23,7 +23,7 @@ const helper = {
         const height = window.innerHeight;
         const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
         sceneElements.camera = camera;
-        camera.position.set(0, 5, 5);
+        camera.position.set(0, 10, 5);
         camera.lookAt(0, 0, 0);
 
         // ************************** //
@@ -45,22 +45,30 @@ const helper = {
         // ***************************** //
         // Add spotlight (with shadows)
         // ***************************** //
-        const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.8);
-        spotLight.position.set(0, 30, 0);
-        sceneElements.sceneGraph.add(spotLight);
+        const lightParent = new THREE.Object3D();
         
-        const spotLightHelper = new THREE.SpotLightHelper( spotLight );
-        sceneElements.sceneGraph.add( spotLightHelper );
+        const sunLight = new THREE.PointLight('rgb(255, 255, 255)', 1.2, 200);
+        sunLight.position.set(0, 50, 0);
+        sceneElements.sceneGraph.add(sunLight);
 
         // Setup shadow properties for the spotlight
-        spotLight.castShadow = true;
-        spotLight.shadow.mapSize.width = 2048;
-        spotLight.shadow.mapSize.height = 2048;
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        
+        lightParent.add(sunLight)
 
-        // Give a name to the spot light
-        spotLight.name = "sun";
+        var sunText = new THREE.TextureLoader().load( 'https://upload.wikimedia.org/wikipedia/commons/9/99/Map_of_the_full_sun.jpg' )
+        const sunGeom = new THREE.SphereGeometry(3.2,30,30)
+        const sun = new THREE.Mesh(sunGeom, new THREE.MeshBasicMaterial({map: sunText}))
+        lightParent.add(sun)
+        sun.position.y = 50
+        lightParent.name = "lightParent"
+        const moon = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('https://pbs.twimg.com/media/CMdOmV9W8AA5--n?format=png&name=medium')}))
+        moon.position.y = -50
+        lightParent.add(moon)
 
-
+        sceneElements.sceneGraph.add(lightParent)
         // *********************************** //
         // Create renderer (with shadow map)
         // *********************************** //
