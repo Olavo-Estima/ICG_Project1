@@ -397,7 +397,7 @@ function createFence(scene){
         bevelEnabled: false
     })
     
-    var connectors = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({color: 0xc07341}))
+    var connectors = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({color: 0xc07341, map: wood}))
     fencePart1.add(connectors);
     connectors.translateZ(-0.1);
 
