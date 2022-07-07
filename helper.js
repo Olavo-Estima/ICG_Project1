@@ -55,6 +55,7 @@ const helper = {
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
+        sunLight.name = "sunLight";
         
         lightParent.add(sunLight)
 
@@ -63,9 +64,11 @@ const helper = {
         const sun = new THREE.Mesh(sunGeom, new THREE.MeshBasicMaterial({map: sunText}))
         lightParent.add(sun)
         sun.position.y = 50
+        sun.name = "sun"
         lightParent.name = "lightParent"
         const moon = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('https://pbs.twimg.com/media/CMdOmV9W8AA5--n?format=png&name=medium')}))
         moon.position.y = -50
+        moon.name = "moon";
         lightParent.add(moon)
 
         sceneElements.sceneGraph.add(lightParent)

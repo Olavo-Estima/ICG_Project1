@@ -19,8 +19,9 @@ const sceneElements = {
 
 var visibleFlag = 1;
 var enable = 0;
-var carSpeed = 0.04;
+var carSpeed = 0.4;
 var manual = 0;
+var reset = 0;
 
 // Functions are called
 //  1. Initialize the empty scene
@@ -30,7 +31,10 @@ helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
 
-const sun = sceneElements.sceneGraph.getObjectByName("lightParent");
+const lightParent = sceneElements.sceneGraph.getObjectByName("lightParent");
+const sunLight = sceneElements.sceneGraph.getObjectByName("sunLight");
+const sun = sceneElements.sceneGraph.getObjectByName("sun");
+const moon = sceneElements.sceneGraph.getObjectByName("moon");
 // HANDLING EVENTS
 
 // Event Listeners
@@ -68,11 +72,11 @@ function onDocumentKeyDown(event) {
             keyArrowDown = true;
             break;
         case 65: //a
-            carSpeed += 0.01;
+            carSpeed += 0.1;
             keyA = true;
             break;
         case 68: //d
-            if (carSpeed > 0) carSpeed -= 0.01;
+            if (carSpeed > 0) carSpeed -= 0.1;
             keyD = true;
             break;
         case 72: //h
@@ -87,7 +91,7 @@ function onDocumentKeyDown(event) {
             keyS = true;
             break;
         case 87: //w
-            sun.position.set(0, 30, 0);
+            reset = true;
             keyW = true;
             break;
     }
@@ -138,7 +142,6 @@ car.translateX(0)
 car.castShadow = true;
 
 var house = createHouse(sceneElements.sceneGraph, 4, 8, 15, 0xff9999, -10, -10, true);
-house.name = "house"
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
 
@@ -197,37 +200,28 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add(camera) 
 }
 
-    
-
-    var deltaX = sceneElements.sceneGraph.getObjectByName("lightParent").position.x;
-    var deltaY = sceneElements.sceneGraph.getObjectByName("lightParent").position.y;
-
-    var decreaseX = false; 
-    var decreaseY = true;
-
 function computeFrame(time) {
 
     // THE SPOT LIGHT
-
     // Can extract an object from the scene Graph from its name
     
-        var disp = 0.5;
+       
         if (car.position.x < 25 && car.position.x > -25 && car.position.z < 25  && car.position.z > -25){
             if (keyArrowUp) { 
-                car.translateX(disp*.5);
+                car.translateX(carSpeed*.5);
             }
             if (keyArrowLeft) {
                 car.rotation.y += 0.1;
-                car.translateZ(-disp/3);
-                car.translateX(disp/3);
+                car.translateZ(-carSpeed/3);
+                car.translateX(carSpeed/3);
             }
             if (keyArrowDown) {
-                car.translateX(-disp*.5);
+                car.translateX(-carSpeed*.5);
             }
             if (keyArrowRight) {
                 car.rotation.y -= 0.1;
-                car.translateZ(disp/3);
-                car.translateX(disp/3);
+                car.translateZ(carSpeed/3);
+                car.translateX(carSpeed/3);
             }
     
         } else {
@@ -240,14 +234,12 @@ function computeFrame(time) {
             if (currz <= -25) { car.position.set( currx, 0, -currz-0.1 )  }
         }
     // Apply a small displacement
-    
-    if(enable){
-       sun.rotateZ(0.002)
-    }   
-    
-    sun.position.set(deltaX, deltaY, 0);
+    if(keyW) {lightParent.rotation.z = 0; sun.position.y = 50; sun.position.z = 0; sun.position.x = 0; moon.position.y = -50; moon.position.x = 0; moon.position.z = 0; sunLight.position.x = 0; sunLight.position.y = 50; sunLight.position.z = 0; reset = false;}
 
-    if(keyW) { deltaX = 0; deltaY = 30; sun.position.set(deltaX, deltaY,0); }
+    if(enable){
+       lightParent.rotateZ(0.002)
+    }
+    
     // CONTROLING OBJECTS WITH KEYBOARD
 
     
