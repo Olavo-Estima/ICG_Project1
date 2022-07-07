@@ -138,6 +138,7 @@ car.translateX(0)
 car.castShadow = true;
 
 var house = createHouse(sceneElements.sceneGraph, 4, 8, 15, 0xff9999, -10, -10, true);
+house.name = "house"
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
 
@@ -196,7 +197,7 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add(camera) 
 }
 
-
+    
 
     var deltaX = sceneElements.sceneGraph.getObjectByName("lightParent").position.x;
     var deltaY = sceneElements.sceneGraph.getObjectByName("lightParent").position.y;
@@ -251,14 +252,14 @@ function computeFrame(time) {
 
     
     
-    if (keyH) {
+    /* if (keyH) {
         if(visibleFlag){
            house.visible = true;
         }
         else{
             house.visible = false;
         }
-    }
+    } */
 
     // Rendering
     helper.render(sceneElements);
